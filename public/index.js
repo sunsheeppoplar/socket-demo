@@ -45,6 +45,7 @@ document.addEventListener('DOMContentLoaded', (e) => {
     messageContainer.appendChild(message);
   })
 
+  // manual
   submitButton.addEventListener('click', () => {
     const { value } = input;
 
@@ -52,6 +53,15 @@ document.addEventListener('DOMContentLoaded', (e) => {
       senderId: socketClient.id,
       value
     });
-  })
+  });
+
+  // keyboard
+  input.addEventListener('keyup', (e) => {
+    if (e.keyCode === 13) {
+      e.preventDefault();
+
+      submitButton.click();
+    }
+  });
 });
 
