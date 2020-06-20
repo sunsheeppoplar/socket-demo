@@ -5,7 +5,25 @@
     <title>Socket Demo</title>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/socket.io/2.3.0/socket.io.js"></script>
     <script src="/index.js" ></script>
+    <style>
+      body {
+        display: flex;
+        flex-direction: row;
+      }
+
+      body div {
+        flex: 1;
+      }
+    </style>
   </head>
   <body>
+    <div id="log-container"></div>
+    <div id="message-container">
+      <input
+        id="input"
+        placeholder="type here"
+      >
+      <button id="button">submit</button>
+    </div>
   </body>
 </html>

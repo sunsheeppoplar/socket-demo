@@ -15,14 +15,29 @@ app.use('/', router);
 
 router.get('/', (req, res) => {
     res.sendFile('index');
-})
+});
 
 socketServer.on('connection', (socket) => {
-  const logMessages = `
-  id: ${socket.id}
-  pid: ${process.pid}`
+  const socketInfo = `
+    id: ${socket.id}
+    pid: ${process.pid}
+  `;
 
-  console.log(`=== server socket connected === ${logMessages}`)
-})
+  console.log(`=== server socket CONNECTED === ${socketInfo}`);
+
+  socket.on('disconnect', (reason) => {
+    const socketInfo = `
+    id: ${socket.id}
+    pid: ${process.pid}
+    reason: ${reason}`;
+
+    console.log(`=== server socket DISCONNECTED === ${socketInfo}`);
+  })
+
+  socket.on('broadcast', (data) => {
+    socket.broadcast.emit('message', data);
+    console.log(`socket ${socket.id} emitted ${JSON.stringify(data)}`);
+  })
+});
 
 server.listen(port, () => console.log(`listening on port ${port}`));
