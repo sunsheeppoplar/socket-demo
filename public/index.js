@@ -51,11 +51,15 @@ document.addEventListener('DOMContentLoaded', (e) => {
   submitButton.addEventListener('click', () => {
     const { value } = input;
 
+    if (value === '') return;
+
     socketClient.emit('broadcast', {
       senderId: socketClient.id,
       sentAt: new Date(),
       value
     });
+
+    input.value = '';
   });
 
   // keyboard
