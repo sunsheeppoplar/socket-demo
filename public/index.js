@@ -35,12 +35,14 @@ document.addEventListener('DOMContentLoaded', (e) => {
   });
 
   socketClient.on('message', (data) => {
-    const { value, senderId } = data;
+    const { value, senderId, sentAt } = data;
 
     const message = document.createElement('div');
     message.innerText = `
       senderId: ${senderId}
-      message: ${value}`;
+      message: ${value}
+      sentAt: ${new Date(sentAt)}
+      `;
 
     messageContainer.appendChild(message);
   })
@@ -51,6 +53,7 @@ document.addEventListener('DOMContentLoaded', (e) => {
 
     socketClient.emit('broadcast', {
       senderId: socketClient.id,
+      sentAt: new Date(),
       value
     });
   });
