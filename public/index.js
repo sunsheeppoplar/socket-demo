@@ -1,16 +1,17 @@
 document.addEventListener('DOMContentLoaded', (e) => {
   const socketClient = io.connect(`${location.protocol === 'https:' ? 'wss' : 'ws'}://${location.host}`);
 
-  // cache html
-  const logContainer = document.getElementById('log-container');
-  const submitButton = document.getElementById('button');
-  const input = document.getElementById('input');
-  const messageContainer = document.getElementById('message-container');
+  const cachedHTML = {
+    'logContainer': document.getElementById('log-container'),
+    'submitButton': document.getElementById('button'),
+    'input': document.getElementById('input'),
+    'messageContainer': document.getElementById('message-container'),
+  }
 
-  const appendInfo = (message) => {
+  const appendInfo = (message, container) => {
     const div = document.createElement('div')
     div.innerText = message;
-    logContainer.appendChild(div);
+    cachedHTML[container].appendChild(div);
   }
 
   const getRoom = () => {
@@ -32,7 +33,7 @@ document.addEventListener('DOMContentLoaded', (e) => {
     time: ${new Date()}
     -------------------`;
 
-    appendInfo(socketInfo);
+    appendInfo(socketInfo, 'logContainer');
     joinRoom();
   });
   
@@ -44,7 +45,7 @@ document.addEventListener('DOMContentLoaded', (e) => {
     time: ${new Date()}
     -------------------`;
 
-    appendInfo(socketInfo);
+    appendInfo(socketInfo, 'logContainer');
   });
 
   socketClient.on('otherClientJoined', (data) => {
@@ -57,24 +58,25 @@ document.addEventListener('DOMContentLoaded', (e) => {
     time: ${new Date(joinedAt)}
     `
 
-    appendInfo(socketInfo);
+    appendInfo(socketInfo, 'logContainer');
   });
 
   socketClient.on('message', (data) => {
     const { value, senderId, sentAt } = data;
 
-    const message = document.createElement('div');
-    message.innerText = `
-      senderId: ${senderId}
+    const identifier = socketClient.id === senderId ? '(me)' : ''
+
+    const socketInfo = `
+      senderId: ${senderId} ${identifier}
       message: ${value}
       sentAt: ${new Date(sentAt)}
       `;
 
-    messageContainer.appendChild(message);
+    appendInfo(socketInfo, 'messageContainer');
   })
 
   // manual
-  submitButton.addEventListener('click', () => {
+  cachedHTML['submitButton'].addEventListener('click', () => {
     const { value } = input;
 
     if (value === '') return;
@@ -92,11 +94,11 @@ document.addEventListener('DOMContentLoaded', (e) => {
   });
 
   // keyboard
-  input.addEventListener('keyup', (e) => {
+  cachedHTML['input'].addEventListener('keyup', (e) => {
     if (e.keyCode === 13) {
       e.preventDefault();
 
-      submitButton.click();
+      cachedHTML['submitButton'].click();
     }
   });
 });

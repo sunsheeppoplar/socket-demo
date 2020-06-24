@@ -30,7 +30,7 @@ socketServer.on('connection', (socket) => {
   socket.on('broadcast', (data) => {
     const { room } = data;
 
-    socket.to(room).broadcast.emit('message', data);
+    socket.nsp.to(room).emit('message', data);
     console.log(`socket ${socket.id} emitted ${JSON.stringify(data)}`);
   });
 
