@@ -10,13 +10,6 @@ const port = process.env.PORT || 3000;
 const server = http.createServer(app);
 const socketServer = io(server);
 
-app.use(express.static(path.join(__dirname, 'public')));
-app.use('/', router);
-
-router.get('/', (req, res) => {
-    res.sendFile('index');
-});
-
 socketServer.on('connection', (socket) => {
   const socketInfo = `
     id: ${socket.id}
@@ -35,9 +28,34 @@ socketServer.on('connection', (socket) => {
   })
 
   socket.on('broadcast', (data) => {
-    socket.broadcast.emit('message', data);
+    const { room } = data;
+
+    socket.to(room).broadcast.emit('message', data);
     console.log(`socket ${socket.id} emitted ${JSON.stringify(data)}`);
+  });
+
+  socket.on('join', (data) => {
+    const { room } = data;
+
+    socket.join(room, () => {
+      const joinedData = {
+        socketId: socket.id,
+        joinedAt: new Date(),
+        room,
+      };
+
+      socket.to(room).emit('otherClientJoined', joinedData)
+      console.log(`socket ${socket.id} joined room: ${room}`);
+    });
   })
 });
+
+app.use('/', router);
+
+router.get('/', (req, res) => {
+  res.sendFile(path.join(__dirname, 'public/index.html'));
+});
+
+app.use(express.static(path.join(__dirname, 'public')));
 
 server.listen(port, () => console.log(`listening on port ${port}`));

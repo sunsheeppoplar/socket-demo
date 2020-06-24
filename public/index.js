@@ -12,24 +12,50 @@ document.addEventListener('DOMContentLoaded', (e) => {
     div.innerText = message;
     logContainer.appendChild(div);
   }
+
+  const getRoom = () => {
+    const params = new URLSearchParams(window.location.search);
+
+    return params.get('room') ? params.get('room') : '1';
+  }
+
+  const joinRoom = () => {
+    const room = getRoom();
+
+    socketClient.emit('join', { room });
+  }
   
   socketClient.on('connect', () => {
     const socketInfo = `
-    --- client socket connected ---
+    --- MY client socket connected ---
     id: ${socketClient.id}
     time: ${new Date()}
     -------------------`;
 
     appendInfo(socketInfo);
+    joinRoom();
   });
   
   socketClient.on('disconnect', (reason) => {
     const socketInfo = `
-    --- client socket disconnected ---
+    --- MY client socket disconnected ---
     id: ${socketClient.id}
     reason: ${reason}
     time: ${new Date()}
     -------------------`;
+
+    appendInfo(socketInfo);
+  });
+
+  socketClient.on('otherClientJoined', (data) => {
+    const { joinedAt, room, socketId } = data;
+
+    const socketInfo = `
+    --- ANOTHER client socket joined ---
+    id: ${socketId}
+    room: ${room}
+    time: ${new Date(joinedAt)}
+    `
 
     appendInfo(socketInfo);
   });
@@ -53,8 +79,11 @@ document.addEventListener('DOMContentLoaded', (e) => {
 
     if (value === '') return;
 
+    const room = getRoom();
+
     socketClient.emit('broadcast', {
       senderId: socketClient.id,
+      room,
       sentAt: new Date(),
       value
     });
